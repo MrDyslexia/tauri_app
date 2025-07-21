@@ -11,12 +11,20 @@
   },
   "app": {
     "windows": [
-      {
-        "title": "assist_tauri_app",
-        "width": 800,
-        "height": 600
-      }
-    ],
+    {
+      "label": "main",
+      "title": "assist_tauri_app",
+      "width": 400,
+      "height": 500,
+      "resizable": false,
+      "alwaysOnTop": true,
+      "transparent": true,
+      "decorations": true,
+      "fullscreen": false,
+      "visible": true,
+      "shadow": true
+    }
+  ],
     "security": {
       "csp": null
     }

@@ -16,6 +16,8 @@ import {
   ExternalLink,
   ShoppingCart,
 } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Window, LogicalSize } from "@tauri-apps/api/window";
 
 // Tipos de respuesta del asistente
 type ResponseType =
@@ -33,11 +35,24 @@ interface AssistantResponse {
   content: any;
   timestamp: Date;
 }
-
 export default function IndexPage() {
   const [currentView, setCurrentView] = useState<
     "login" | "home" | "chat" | "response"
   >("login");
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const resizeToFitContent = async () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const currentWindow = Window.getCurrent();
+        await currentWindow.setSize(
+          new LogicalSize(Math.ceil(rect.width), Math.ceil(rect.height))
+        );
+      }
+    };
+    resizeToFitContent();
+  }, [currentView]);
   const [isListening, setIsListening] = useState(false);
   const [currentResponse, setCurrentResponse] =
     useState<AssistantResponse | null>(null);
@@ -367,7 +382,7 @@ export default function IndexPage() {
                         <ExternalLink className="h-4 w-4 text-gray-400 ml-2" />
                       </div>
                     </div>
-                  ),
+                  )
                 )}
               </div>
             </div>
@@ -413,7 +428,7 @@ export default function IndexPage() {
                         </div>
                       </div>
                     </div>
-                  ),
+                  )
                 )}
               </div>
             </div>
@@ -433,11 +448,26 @@ export default function IndexPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 flex items-center justify-center">
-      {currentView === "login" && <LoginView />}
-      {currentView === "home" && <HomeView />}
-      {currentView === "chat" && <ChatView />}
-      {currentView === "response" && <ResponseView />}
+    <div
+      className="fixed bg-transparent top-4 right-4 rounded-2xl overflow-hidden"
+      tauri-drag-region="false"
+      style={{ border: "none" }}
+    >
+      <div
+        className="h-6 cursor-move bg-transparent flex items-center justify-between px-4"
+        tauri-drag-region="true"
+        style={{ border: "none" }}
+      />
+
+      <div
+        className="w-full max-w-md bg-white/80 backdrop-blur-lg rounded-2xl shadow-none"
+        style={{ border: "none" }}
+      >
+        {currentView === "login" && <LoginView />}
+        {currentView === "home" && <HomeView />}
+        {currentView === "chat" && <ChatView />}
+        {currentView === "response" && <ResponseView />}
+      </div>
     </div>
   );
 }

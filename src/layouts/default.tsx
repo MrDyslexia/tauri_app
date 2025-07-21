@@ -4,7 +4,7 @@ export default function DefaultLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative flex flex-col h-screen">
+    <div className="fixed top-4 right-4 w-96 bg-white/80 backdrop-blur-md rounded-xl z-50" data-tauri-drag-region>
       <main className="container mx-auto max-w-7xl px-6 flex-grow pt-16">
         {children}
       </main>
