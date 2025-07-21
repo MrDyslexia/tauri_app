@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "assist_tauri_app",
+  "productName": "AI Assistant Overlay",
   "version": "0.1.0",
-  "identifier": "com.assist_tauri_app.app",
+  "identifier": "com.aiassistant.overlay",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -11,20 +11,26 @@
   },
   "app": {
     "windows": [
-    {
-      "label": "main",
-      "title": "assist_tauri_app",
-      "width": 400,
-      "height": 500,
-      "resizable": false,
-      "alwaysOnTop": true,
-      "transparent": true,
-      "decorations": true,
-      "fullscreen": false,
-      "visible": true,
-      "shadow": true
-    }
-  ],
+      {
+        "label": "main",
+        "title": "AI Assistant",
+        "minHeight": 150,
+        "maxHeight": 500,
+        "minWidth": 150,
+        "maxWidth": 400,
+        "resizable": true,
+        "alwaysOnTop": true,
+        "transparent": true,
+        "decorations": false,
+        "fullscreen": false,
+        "visible": true,
+        "shadow": false,
+        "skipTaskbar": false,
+        "center": false,
+        "x": 100,
+        "y": 100
+      }
+    ],
     "security": {
       "csp": null
     }
@@ -32,12 +38,6 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ]
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
   }
 }
