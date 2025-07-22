@@ -1,8 +1,6 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { Button, Switch } from "@heroui/react";
-import { Minimize2, Settings } from "lucide-react";
+import { Minimize2, Settings, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTauriCommands } from "@/hooks/use-tauri-commands";
 
@@ -38,7 +36,11 @@ export default function OverlayControls({
   const handleMinimize = async () => {
     await minimizeToTray();
   };
-
+  const handleClose = () => {
+    if (onToggleVisibility) {
+      onToggleVisibility();
+    }
+  }
   return (
     <div className="relative">
       {/* Barra de título personalizada */}
@@ -76,6 +78,9 @@ export default function OverlayControls({
 
               <Button size="md" variant="light" onPress={handleMinimize}>
                 <Minimize2 size={18} color="white" />
+              </Button>
+              <Button size="md" variant="light" onPress={handleClose}>
+                <X size={18} color="white" />
               </Button>
             </motion.div>
           )}
