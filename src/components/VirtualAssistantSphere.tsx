@@ -1,6 +1,5 @@
-
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState } from "react";
 interface VirtualAssistantSphereProps {
   menuItems: { label: string; icon: string }[];
   onMenuAction: (action: string) => void;
@@ -8,6 +7,7 @@ interface VirtualAssistantSphereProps {
   isThinking: boolean;
   setIsOpen: (open: boolean) => void;
   setIsThinking?: (thinking: boolean) => void;
+  thinkingInstruction?: string;
 }
 
 const VirtualAssistantSphere = ({
@@ -15,12 +15,34 @@ const VirtualAssistantSphere = ({
   onMenuAction,
   isOpen,
   setIsOpen,
-  isThinking
+  isThinking,
+  thinkingInstruction,
 }: VirtualAssistantSphereProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [displayedText, setDisplayedText] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
   const sphereRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isThinking || !thinkingInstruction) {
+      setDisplayedText("");
+      return;
+    }
+    
+    const instruction = thinkingInstruction.slice(0, 120);
+    let currentText = "";
+    setDisplayedText("");
 
+    const typingInterval = setInterval(() => {
+      if (currentText.length < instruction.length) {
+        currentText += instruction.charAt(currentText.length);
+        setDisplayedText(currentText);
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, 30);
+
+    return () => clearInterval(typingInterval);
+  }, [isThinking, thinkingInstruction]);
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -46,26 +68,45 @@ const VirtualAssistantSphere = ({
     <>
       <AnimatePresence>
         {isThinking && (
-          <motion.div
-            className="absolute inset-0 flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
+          <>
             <motion.div
-              className="text-white text-xs font-medium bg-black/30 rounded-full px-2 py-1 backdrop-blur-sm"
-              animate={{
-                scale: [1, 1.05, 1],
-                y: [0, -5, 0],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Number.POSITIVE_INFINITY,
-              }}
+              className="flex z-50 justify-start items-start max-w-xs"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
             >
-              Pensando...
+              <div className="text-white text-xs text-center font-medium bg-black/30 rounded-md p-2 backdrop-blur-sm">
+                <div className="typing-effect">
+                  {displayedText}
+                  <motion.span
+                    className="inline-block w-1 h-4 bg-slate-800 ml-1"
+                    animate={{ opacity: [0, 1, 0] }}
+                    transition={{ repeat: Infinity, duration: 0.8 }}
+                  />
+                </div>
+              </div>
             </motion.div>
-          </motion.div>
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="text-white text-xs font-medium bg-black/30 rounded-full px-2 py-1 backdrop-blur-sm"
+                animate={{
+                  scale: [1, 1.05, 1],
+                  y: [0, -5, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Number.POSITIVE_INFINITY,
+                }}
+              >
+                Pensando...
+              </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
