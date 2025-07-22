@@ -11,6 +11,11 @@
     "core:window:allow-hide",
     "core:window:allow-show",
     "core:window:allow-set-focus",
+    "core:window:allow-minimize",
+    "core:window:allow-unminimize",
+    "core:tray:default",
+    "core:menu:default",
+    "core:app:default",
     "opener:default"
   ]
 }

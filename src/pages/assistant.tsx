@@ -2,16 +2,18 @@
 
 import { useState } from "react"
 import { AnimatePresence } from "framer-motion"
+import { useNavigate } from "react-router-dom"
 import OverlayControls from "@/components/overlay-controls"
 import LoginView from "@/components/views/login-view"
 import HomeView from "@/components/views/home-view"
 import ChatView from "@/components/views/chat-view"
 import ResponseView from "@/components/views/response-view"
 import { sampleResponses } from "@/data/samples-responses"
-import type { AssistantResponse } from "@/types/interfaces"
+import type { AssistantResponse, ViewType } from "@/types/interfaces"
 
-export default function HomePage() {
-  const [currentView, setCurrentView] = useState<"login" | "home" | "chat" | "response">("login")
+export default function AssistantPage() {
+  const navigate = useNavigate()
+  const [currentView, setCurrentView] = useState<ViewType>("login")
   const [currentResponse, setCurrentResponse] = useState<AssistantResponse | null>(null)
 
   const handleLogin = () => {
@@ -35,10 +37,14 @@ export default function HomePage() {
     setCurrentView("chat")
   }
 
+  const handleBackToSphere = () => {
+    navigate("/")
+  }
+
   return (
     <div className="fixed top-4 right-4 w-96 z-50">
       <div className="space-y-0">
-        <OverlayControls />
+        <OverlayControls onBackToSphere={handleBackToSphere} />
         <div data-tauri-drag-region="false" className="bg-white/95 backdrop-blur-md rounded-b-xl shadow-xl">
           <div className="p-4">
             <AnimatePresence mode="wait">

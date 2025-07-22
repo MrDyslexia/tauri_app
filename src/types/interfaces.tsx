@@ -1,6 +1,8 @@
 // Tipos de respuesta del asistente
 export type ResponseType = "text" | "image" | "links" | "products" | "weather" | "calendar"
 
+export type ViewType = "login" | "home" | "chat" | "response"
+
 export interface AssistantResponse {
   id: string
   type: ResponseType
@@ -42,4 +44,14 @@ export interface LinksContent {
 export interface ProductsContent {
   text: string
   products: Product[]
+}
+
+// Contexto para el estado global
+export interface AppContextType {
+  currentView: ViewType
+  setCurrentView: (view: ViewType) => void
+  currentResponse: AssistantResponse | null
+  setCurrentResponse: (response: AssistantResponse | null) => void
+  isAuthenticated: boolean
+  setIsAuthenticated: (auth: boolean) => void
 }
