@@ -40,7 +40,7 @@ const VirtualAssistantSphere: React.FC<VirtualAssistantSphereProps> = ({ onMenuA
       {/* Botón principal de la esfera */}
       <motion.div
         ref={sphereRef}
-        className="fixed bottom-8 z-40 cursor-pointer cursor-move"
+        className="fixed z-40 cursor-pointer cursor-move"
         data-tauri-drag-region="true"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
