@@ -33,21 +33,12 @@ export const useTauriCommands = () => {
     }
   }
 
-  // Función para ocultar en el system tray
   const hideToTray = async () => {
     try {
       await invoke("hide_to_tray")
+      console.log("Window hidden to tray successfully")
     } catch (error) {
       console.error("Error hiding to tray:", error)
-    }
-  }
-
-  // Función para mostrar desde el tray
-  const showFromTray = async () => {
-    try {
-      await invoke("show_from_tray")
-    } catch (error) {
-      console.error("Error showing from tray:", error)
     }
   }
 
@@ -58,6 +49,16 @@ export const useTauriCommands = () => {
     } catch (error) {
       console.error("Error getting window position:", error)
       return null
+    }
+  }
+
+  const getTrayStatus = async (): Promise<boolean> => {
+    try {
+      const status = (await invoke("get_tray_status")) as boolean
+      return status
+    } catch (error) {
+      console.error("Error getting tray status:", error)
+      return false
     }
   }
 
@@ -75,8 +76,8 @@ export const useTauriCommands = () => {
     setAlwaysOnTop,
     minimizeWindow,
     hideToTray,
-    showFromTray,
     getWindowPosition,
+    getTrayStatus,
     quitApp,
   }
 }

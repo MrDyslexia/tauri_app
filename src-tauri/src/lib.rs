@@ -1,12 +1,13 @@
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
-    tray::{MouseButton, TrayIconBuilder, TrayIconEvent},
-    Manager, Window, WindowEvent,
+    tray::{MouseButton, TrayIconBuilder, TrayIconEvent, TrayIcon},
+    Manager, WebviewWindow, WindowEvent, AppHandle,
 };
 use std::sync::Mutex;
 
-// Estado global para controlar la visibilidad
-static WINDOW_VISIBLE: Mutex<bool> = Mutex::new(true);
+// Estado global para controlar la visibilidad y el tray
+static WINDOW_STATE: Mutex<bool> = Mutex::new(true);
+static TRAY_ICON: Mutex<Option<TrayIcon>> = Mutex::new(None);
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -14,8 +15,8 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-fn toggle_window_visibility(window: Window) -> Result<(), String> {
-    let mut visible = WINDOW_VISIBLE.lock().unwrap();
+fn toggle_window_visibility(window: WebviewWindow) -> Result<(), String> {
+    let mut visible = WINDOW_STATE.lock().unwrap();
     
     if *visible {
         window.hide().map_err(|e| e.to_string())?;
@@ -30,51 +31,159 @@ fn toggle_window_visibility(window: Window) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn set_window_position(window: Window, x: i32, y: i32) -> Result<(), String> {
+fn set_window_position(window: WebviewWindow, x: i32, y: i32) -> Result<(), String> {
     use tauri::LogicalPosition;
     window.set_position(LogicalPosition::new(x, y)).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn set_always_on_top(window: Window, on_top: bool) -> Result<(), String> {
+fn set_always_on_top(window: WebviewWindow, on_top: bool) -> Result<(), String> {
     window.set_always_on_top(on_top).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-fn minimize_window(window: Window) -> Result<(), String> {
+fn minimize_window(window: WebviewWindow) -> Result<(), String> {
+    // Minimizar normal - aparece en barra de tareas
+    window.set_skip_taskbar(false).map_err(|e| e.to_string())?;
     window.minimize().map_err(|e| e.to_string())?;
-    Ok(())
-}
-
-// Función para ocultar en el system tray
-#[tauri::command]
-fn hide_to_tray(window: Window) -> Result<(), String> {
-    window.hide().map_err(|e| e.to_string())?;
-    let mut visible = WINDOW_VISIBLE.lock().unwrap();
+    
+    // Actualizar estado
+    let mut visible = WINDOW_STATE.lock().unwrap();
     *visible = false;
+    
     Ok(())
 }
 
-// Función para mostrar desde el tray
-#[tauri::command]
-fn show_from_tray(window: Window) -> Result<(), String> {
+// MEJORADO: Función para limpiar el tray icon existente
+fn clear_tray_icon() {
+    let mut tray_guard = TRAY_ICON.lock().unwrap();
+    if let Some(tray) = tray_guard.take() {
+        // Intentar remover el tray icon
+        drop(tray); // Esto debería limpiar el tray icon
+    }
+}
+
+// Función para crear el tray icon
+fn create_tray_icon(app: &AppHandle) -> Result<TrayIcon, Box<dyn std::error::Error>> {
+    // IMPORTANTE: Limpiar cualquier tray icon existente primero
+    clear_tray_icon();
+    
+    let show_item = MenuItem::with_id(app, "show", "📱 Mostrar Asistente", true, None::<&str>)?;
+    let separator = PredefinedMenuItem::separator(app)?;
+    let quit_item = MenuItem::with_id(app, "quit", "❌ Salir", true, None::<&str>)?;
+    
+    let tray_menu = Menu::with_items(app, &[&show_item, &separator, &quit_item])?;
+    
+    let tray = TrayIconBuilder::new()
+        .menu(&tray_menu)
+        .tooltip("AI Assistant - Clic para mostrar")
+        .icon(app.default_window_icon().unwrap().clone())
+        .on_tray_icon_event({
+            let app_handle = app.clone();
+            move |_tray, event| {
+                if let TrayIconEvent::Click { button: MouseButton::Left, .. } = event {
+                    if let Some(window) = app_handle.get_webview_window("main") {
+                        // Mostrar ventana y remover del tray
+                        let _ = show_window_from_tray(&window, &app_handle);
+                    }
+                }
+            }
+        })
+        .on_menu_event({
+            let app_handle = app.clone();
+            move |_app, event| {
+                match event.id.as_ref() {
+                    "show" => {
+                        if let Some(window) = app_handle.get_webview_window("main") {
+                            let _ = show_window_from_tray(&window, &app_handle);
+                        }
+                    }
+                    "quit" => {
+                        // Limpiar tray antes de salir
+                        clear_tray_icon();
+                        app_handle.exit(0);
+                    }
+                    _ => {}
+                }
+            }
+        })
+        .build(app)?;
+    
+    Ok(tray)
+}
+
+// CORREGIDO: Función para mostrar ventana desde el tray
+fn show_window_from_tray(window: &WebviewWindow, _app: &AppHandle) -> Result<(), String> {
+    // 1. PRIMERO: Limpiar el tray icon
+    clear_tray_icon();
+    
+    // 2. Mostrar ventana en la barra de tareas
+    window.set_skip_taskbar(false).map_err(|e| e.to_string())?;
     window.show().map_err(|e| e.to_string())?;
+    window.unminimize().map_err(|e| e.to_string())?;
     window.set_focus().map_err(|e| e.to_string())?;
-    let mut visible = WINDOW_VISIBLE.lock().unwrap();
+    
+    // 3. Actualizar estado
+    let mut visible = WINDOW_STATE.lock().unwrap();
     *visible = true;
+    
+    println!("Window restored from tray, tray icon should be removed");
+    
+    Ok(())
+}
+
+// MEJORADO: Función para ocultar en el system tray
+#[tauri::command]
+fn hide_to_tray(window: WebviewWindow, app: AppHandle) -> Result<(), String> {
+    println!("Hiding window to tray...");
+    
+    // 1. Limpiar cualquier tray icon existente primero
+    clear_tray_icon();
+    
+    // 2. Ocultar de la barra de tareas
+    window.set_skip_taskbar(true).map_err(|e| e.to_string())?;
+    window.hide().map_err(|e| e.to_string())?;
+    
+    // 3. Crear el icono del tray
+    match create_tray_icon(&app) {
+        Ok(tray) => {
+            let mut tray_guard = TRAY_ICON.lock().unwrap();
+            *tray_guard = Some(tray);
+            println!("Tray icon created successfully");
+        }
+        Err(e) => {
+            eprintln!("Error creating tray icon: {}", e);
+            return Err(format!("Failed to create tray icon: {}", e));
+        }
+    }
+    
+    // 4. Actualizar estado
+    let mut visible = WINDOW_STATE.lock().unwrap();
+    *visible = false;
+    
     Ok(())
 }
 
 #[tauri::command]
-fn get_window_position(window: Window) -> Result<(i32, i32), String> {
+fn get_window_position(window: WebviewWindow) -> Result<(i32, i32), String> {
     let position = window.outer_position().map_err(|e| e.to_string())?;
     Ok((position.x, position.y))
 }
 
 #[tauri::command]
 fn quit_app(app: tauri::AppHandle) -> Result<(), String> {
+    println!("Quitting application...");
+    // Limpiar el tray antes de salir
+    clear_tray_icon();
     app.exit(0);
     Ok(())
+}
+
+// NUEVO: Comando para verificar el estado del tray
+#[tauri::command]
+fn get_tray_status() -> bool {
+    let tray_guard = TRAY_ICON.lock().unwrap();
+    tray_guard.is_some()
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -88,8 +197,8 @@ pub fn run() {
             set_always_on_top,
             minimize_window,
             hide_to_tray,
-            show_from_tray,
             get_window_position,
+            get_tray_status,
             quit_app
         ])
         .setup(|app| {
@@ -97,79 +206,36 @@ pub fn run() {
             
             // Configurar la ventana
             let _ = window.set_always_on_top(true);
-            
-            // Crear el menú del system tray - CORREGIDO
-            let show_item = MenuItem::with_id(app, "show", "Mostrar Asistente", true, None::<&str>)?;
-            let hide_item = MenuItem::with_id(app, "hide", "Ocultar", true, None::<&str>)?;
-            let separator = PredefinedMenuItem::separator(app)?;
-            let quit_item = MenuItem::with_id(app, "quit", "Salir", true, None::<&str>)?;
-            
-            let tray_menu = Menu::with_items(app, &[&show_item, &hide_item, &separator, &quit_item])?;
-            
-            // Crear el system tray
-            let _tray = TrayIconBuilder::new()
-                .menu(&tray_menu)
-                .tooltip("AI Assistant")
-                .icon(app.default_window_icon().unwrap().clone())
-                .on_tray_icon_event(|tray, event| {
-                    let app = tray.app_handle();
-                    
-                    match event {
-                        TrayIconEvent::Click {
-                            button: MouseButton::Left,
-                            ..
-                        } => {
-                            // Clic izquierdo: mostrar/ocultar ventana
-                            if let Some(window) = app.get_webview_window("main") {
-                                let visible = WINDOW_VISIBLE.lock().unwrap();
-                                if *visible {
-                                    let _ = window.hide();
-                                } else {
-                                    let _ = window.show();
-                                    let _ = window.set_focus();
-                                }
-                                drop(visible);
-                                let mut visible = WINDOW_VISIBLE.lock().unwrap();
-                                *visible = !*visible;
-                            }
-                        }
-                        _ => {}
-                    }
-                })
-                .on_menu_event(|app, event| {
-                    match event.id.as_ref() {
-                        "show" => {
-                            if let Some(window) = app.get_webview_window("main") {
-                                let _ = window.show();
-                                let _ = window.set_focus();
-                                let mut visible = WINDOW_VISIBLE.lock().unwrap();
-                                *visible = true;
-                            }
-                        }
-                        "hide" => {
-                            if let Some(window) = app.get_webview_window("main") {
-                                let _ = window.hide();
-                                let mut visible = WINDOW_VISIBLE.lock().unwrap();
-                                *visible = false;
-                            }
-                        }
-                        "quit" => {
-                            app.exit(0);
-                        }
-                        _ => {}
-                    }
-                })
-                .build(app)?;
+            // Inicialmente visible en la barra de tareas
+            let _ = window.set_skip_taskbar(false);
             
             // Manejar eventos de la ventana
             let window_clone = window.clone();
+            let app_handle = app.handle().clone();
+            
             window.on_window_event(move |event| {
                 match event {
                     WindowEvent::CloseRequested { api, .. } => {
-                        // Al cerrar, ocultar en el tray en lugar de cerrar
+                        println!("Close requested, hiding to tray...");
+                        // Al cerrar, ocultar en el tray
                         api.prevent_close();
+                        
+                        // Limpiar tray existente
+                        clear_tray_icon();
+                        
+                        // Ocultar de la barra de tareas
+                        let _ = window_clone.set_skip_taskbar(true);
                         let _ = window_clone.hide();
-                        let mut visible = WINDOW_VISIBLE.lock().unwrap();
+                        
+                        // Crear icono del tray
+                        if let Ok(tray) = create_tray_icon(&app_handle) {
+                            let mut tray_guard = TRAY_ICON.lock().unwrap();
+                            *tray_guard = Some(tray);
+                            println!("Tray icon created on close");
+                        }
+                        
+                        // Actualizar estado
+                        let mut visible = WINDOW_STATE.lock().unwrap();
                         *visible = false;
                     }
                     _ => {}
