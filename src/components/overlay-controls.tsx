@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button, Checkbox, Switch } from "@heroui/react";
+import { Button, Switch } from "@heroui/react";
 import { Minimize2, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTauriCommands } from "@/hooks/use-tauri-commands";

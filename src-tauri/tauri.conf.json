@@ -14,9 +14,9 @@
       {
         "label": "main",
         "title": "AI Assistant",
-        "minHeight": 150,
+        "minHeight": 50,
         "maxHeight": 500,
-        "minWidth": 150,
+        "minWidth": 50,
         "maxWidth": 400,
         "resizable": true,
         "alwaysOnTop": true,
