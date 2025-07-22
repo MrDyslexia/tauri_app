@@ -1,24 +1,25 @@
-"use client"
 
-import type React from "react"
-import { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useRef, useState} from "react";
 interface VirtualAssistantSphereProps {
-  onMenuAction: (action: string) => void
+  menuItems: { label: string; icon: string }[];
+  onMenuAction: (action: string) => void;
+  isOpen: boolean;
+  isThinking: boolean;
+  setIsOpen: (open: boolean) => void;
+  setIsThinking?: (thinking: boolean) => void;
 }
 
-const VirtualAssistantSphere: React.FC<VirtualAssistantSphereProps> = ({ onMenuAction }) => {
-  const [isHovered, setIsHovered] = useState(false)
-  const [isOpen, setIsOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const sphereRef = useRef<HTMLDivElement>(null)
-
-  const menuItems = [
-    { label: "Nueva tarea", icon: "✨" },
-    { label: "Estado del sistema", icon: "📊" },
-    { label: "Configuración", icon: "⚙️" },
-  ]
+const VirtualAssistantSphere = ({
+  menuItems,
+  onMenuAction,
+  isOpen,
+  setIsOpen,
+  isThinking
+}: VirtualAssistantSphereProps) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const sphereRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -28,21 +29,46 @@ const VirtualAssistantSphere: React.FC<VirtualAssistantSphereProps> = ({ onMenuA
         sphereRef.current &&
         !sphereRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
-    }
+    };
 
     if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isOpen])
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, setIsOpen]);
 
   return (
     <>
+      <AnimatePresence>
+        {isThinking && (
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="text-white text-xs font-medium bg-black/30 rounded-full px-2 py-1 backdrop-blur-sm"
+              animate={{
+                scale: [1, 1.05, 1],
+                y: [0, -5, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Number.POSITIVE_INFINITY,
+              }}
+            >
+              Pensando...
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.div
         ref={sphereRef}
         className="fixed z-40 cursor-pointer"
@@ -82,11 +108,13 @@ const VirtualAssistantSphere: React.FC<VirtualAssistantSphereProps> = ({ onMenuA
                     top: `${Math.random() * 100}%`,
                   }}
                   animate={{
-                    scale: [0, 1, 0],
+                    scale: isThinking ? [0, 1.5, 0] : [0, 1, 0],
                     opacity: [0, 1, 0],
                   }}
                   transition={{
-                    duration: 3 + Math.random() * 2,
+                    duration: isThinking
+                      ? 1 + Math.random()
+                      : 3 + Math.random() * 2,
                     repeat: Number.POSITIVE_INFINITY,
                     delay: Math.random() * 2,
                   }}
@@ -96,11 +124,11 @@ const VirtualAssistantSphere: React.FC<VirtualAssistantSphereProps> = ({ onMenuA
               <motion.div
                 className="absolute inset-1/4 rounded-full bg-gradient-radial from-purple-500/50 via-transparent to-transparent"
                 animate={{
-                  scale: [1, 1.2, 1],
+                  scale: isThinking ? [1, 1.5, 1] : [1, 1.2, 1],
                   rotate: [0, 360],
                 }}
                 transition={{
-                  duration: 10,
+                  duration: isThinking ? 2 : 10,
                   repeat: Number.POSITIVE_INFINITY,
                   ease: "linear",
                 }}
@@ -110,11 +138,11 @@ const VirtualAssistantSphere: React.FC<VirtualAssistantSphereProps> = ({ onMenuA
             <motion.div
               className="absolute inset-0 rounded-full border border-blue-400/40"
               animate={{
-                scale: [1, 1.3, 1],
-                opacity: [1, 0, 1],
+                scale: isThinking ? [1, 1.5, 1] : [1, 1.3, 1],
+                opacity: [1, 0.5, 1],
               }}
               transition={{
-                duration: 3,
+                duration: isThinking ? 1 : 3,
                 repeat: Number.POSITIVE_INFINITY,
                 ease: "easeInOut",
               }}
@@ -125,10 +153,11 @@ const VirtualAssistantSphere: React.FC<VirtualAssistantSphereProps> = ({ onMenuA
             className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full shadow-lg"
             animate={{
               scale: isHovered ? [1, 1.2, 1] : 1,
+              backgroundColor: isThinking ? "#fbbf24" : "#34d399",
             }}
             transition={{
               duration: 1,
-              repeat: isHovered ? Number.POSITIVE_INFINITY : 0,
+              repeat: isHovered || isThinking ? Number.POSITIVE_INFINITY : 0,
             }}
           />
         </motion.div>
@@ -144,7 +173,9 @@ const VirtualAssistantSphere: React.FC<VirtualAssistantSphereProps> = ({ onMenuA
             className="fixed bottom-32 right-8 z-40 bg-slate-900/95 backdrop-blur-lg rounded-2xl p-4 border border-white/20 shadow-2xl min-w-48"
           >
             <div className="space-y-2">
-              <h3 className="text-white font-semibold text-sm mb-3 text-center">Asistente IA</h3>
+              <h3 className="text-white font-semibold text-sm mb-3 text-center">
+                Asistente IA
+              </h3>
               {menuItems.map((item) => (
                 <motion.button
                   key={item.label}
@@ -152,9 +183,9 @@ const VirtualAssistantSphere: React.FC<VirtualAssistantSphereProps> = ({ onMenuA
                   whileHover={{ scale: 1.02, x: 4 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => {
-                    onMenuAction(item.label)
-                    setIsOpen(false)
+                    onMenuAction(item.label);
                   }}
+                  disabled={isThinking}
                 >
                   <span className="text-lg">{item.icon}</span>
                   <span>{item.label}</span>
@@ -165,7 +196,7 @@ const VirtualAssistantSphere: React.FC<VirtualAssistantSphereProps> = ({ onMenuA
         )}
       </AnimatePresence>
     </>
-  )
-}
+  );
+};
 
-export default VirtualAssistantSphere
+export default VirtualAssistantSphere;
