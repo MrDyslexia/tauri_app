@@ -93,7 +93,7 @@ const VirtualAssistantSphere = ({
               exit={{ opacity: 0 }}
             >
               <motion.div
-                className="text-white text-xs font-medium bg-black/30 rounded-full px-2 py-1 backdrop-blur-sm"
+                className="absolute z-41 text-white text-xs font-medium bg-black/30 rounded-full backdrop-blur-sm"
                 animate={{
                   scale: [1, 1.05, 1],
                   y: [0, -5, 0],

@@ -196,3 +196,154 @@ body {
   -webkit-app-region: no-drag;
   app-region: no-drag;
 }
+
+
+
+/* ===== ESTILOS DE AUTOCOMPLETADO CORREGIDOS ===== */
+/* Técnica más agresiva para sobrescribir autocompletado */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  /* Usar box-shadow para simular fondo transparente */
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  /* Forzar color del texto */
+  -webkit-text-fill-color: #374151 !important;
+  color: #374151 !important;
+  /* Prevenir cambio de fondo */
+  background-color: transparent !important;
+  background-image: none !important;
+  /* Transición larga para prevenir parpadeo */
+  transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s !important;
+  /* Asegurar que no haya bordes extraños */
+  border: none !important;
+  outline: none !important;
+}
+
+/* Para modo oscuro */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color: #e5e7eb !important;
+  color: #e5e7eb !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  transition: background-color 5000s ease-in-out 0s, color 5000s ease-in-out 0s !important;
+}
+
+/* Firefox */
+input:-moz-autofill {
+  color: #374151 !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  outline: none !important;
+}
+
+.dark input:-moz-autofill {
+  color: #e5e7eb !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Selectores más específicos para HeroUI */
+[data-slot="input"] input:-webkit-autofill,
+[data-slot="input"] input:-webkit-autofill:hover,
+[data-slot="input"] input:-webkit-autofill:focus,
+[data-slot="input"] input:-webkit-autofill:active,
+.glass-input input:-webkit-autofill,
+.glass-input input:-webkit-autofill:hover,
+.glass-input input:-webkit-autofill:focus,
+.glass-input input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color: #374151 !important;
+  color: #374151 !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  background: transparent !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+.dark [data-slot="input"] input:-webkit-autofill,
+.dark [data-slot="input"] input:-webkit-autofill:hover,
+.dark [data-slot="input"] input:-webkit-autofill:focus,
+.dark [data-slot="input"] input:-webkit-autofill:active,
+.dark .glass-input input:-webkit-autofill,
+.dark .glass-input input:-webkit-autofill:hover,
+.dark .glass-input input:-webkit-autofill:focus,
+.dark .glass-input input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color: #e5e7eb !important;
+  color: #e5e7eb !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  background: transparent !important;
+}
+
+/* Asegurar que todos los inputs mantengan el estilo correcto */
+input {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+input[data-filled="true"] {
+  color: #374151 !important;
+  background-color: transparent !important;
+}
+
+.dark input[data-filled="true"] {
+  color: #e5e7eb !important;
+  background-color: transparent !important;
+}
+
+/* Prevenir cualquier estilo de autocompletado en contenedores */
+.glass-input,
+[data-slot="input-wrapper"],
+[data-slot="inner-wrapper"] {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Forzar transparencia en todos los estados */
+input:autofill,
+input:-webkit-autofill,
+input:-moz-autofill {
+  background-color: transparent !important;
+  background-image: none !important;
+  background: transparent !important;
+}
+
+/* Animación para suavizar la transición */
+@keyframes removeAutofill {
+  to {
+    background-color: transparent !important;
+    background-image: none !important;
+    color: #374151;
+  }
+}
+
+@keyframes removeAutofillDark {
+  to {
+    background-color: transparent !important;
+    background-image: none !important;
+    color: #e5e7eb;
+  }
+}
+
+input:-webkit-autofill {
+  animation-name: removeAutofill;
+  animation-duration: 0.1s;
+  animation-fill-mode: both;
+}
+
+.dark input:-webkit-autofill {
+  animation-name: removeAutofillDark;
+  animation-duration: 0.1s;
+  animation-fill-mode: both;
+}

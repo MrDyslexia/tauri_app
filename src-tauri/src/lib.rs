@@ -13,7 +13,11 @@ static TRAY_ICON: Mutex<Option<TrayIcon>> = Mutex::new(None);
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
-
+#[tauri::command]
+fn resize_window_to_content(window: WebviewWindow, width: u32, height: u32) -> Result<(), String> {
+    window.set_size(tauri::Size::Logical(tauri::LogicalSize { width: width as f64, height: height as f64 }))
+        .map_err(|e| e.to_string())
+}
 #[tauri::command]
 fn toggle_window_visibility(window: WebviewWindow) -> Result<(), String> {
     let mut visible = WINDOW_STATE.lock().unwrap();
@@ -199,7 +203,8 @@ pub fn run() {
             hide_to_tray,
             get_window_position,
             get_tray_status,
-            quit_app
+            quit_app,
+            resize_window_to_content
         ])
         .setup(|app| {
             let window = app.get_webview_window("main").unwrap();

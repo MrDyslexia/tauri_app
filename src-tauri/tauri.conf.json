@@ -15,10 +15,11 @@
         "label": "main",
         "title": "AI Assistant",
         "minHeight": 50,
-        "maxHeight": 500,
+        "maxHeight": 600,
         "minWidth": 50,
         "maxWidth": 400,
-        "resizable": true,
+        "resizable": false,
+        "maximized": false,
         "alwaysOnTop": true,
         "transparent": true,
         "decorations": false,
@@ -38,6 +39,12 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
   }
 }

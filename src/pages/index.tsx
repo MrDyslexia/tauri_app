@@ -3,8 +3,8 @@
 import { useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import VirtualAssistantSphere from "@/components/VirtualAssistantSphere"
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import { invoke } from "@tauri-apps/api/core";
 export default function IndexPage() {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false);
@@ -48,10 +48,12 @@ export default function IndexPage() {
     }
   }
 
-
+useEffect(() => {
+  invoke("resize_window_to_content", { width: 200, height: 200 });
+}, []);
   return (
     <motion.div
-      className="flex flex-col justify-center items-center min-h-screen w-screen bg-transparent"
+      className="flex flex-col justify-end items-center min-h-screen w-screen bg-red-900 p-12"
       initial={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
       transition={{ duration: 0.6 }}
