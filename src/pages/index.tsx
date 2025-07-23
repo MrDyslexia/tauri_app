@@ -10,12 +10,30 @@ export default function IndexPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [thinkingInstruction, setThinkingInstruction] = useState("");
+  const [subMenuOpen, setSubMenuOpen] = useState(false);
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selected, setSelected] = useState<string | null>(null);
   const menuItems = [
     { label: "Nueva tarea", icon: "✨" },
     { label: "Estado del sistema", icon: "📊" },
     { label: "Configuración", icon: "⚙️" },
     { label: "Pensar", icon: "💭" },
   ];
+  const loadDevices = async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true }); // Solicitar permiso
+      const allDevices = await navigator.mediaDevices.enumerateDevices();
+      const audioInputs = allDevices.filter((d) => d.kind === "audioinput");
+      setDevices(audioInputs);
+    } catch (err) {
+      console.error("Error al acceder a micrófonos:", err);
+    }
+  };
+  const handleSelect = (deviceId: string, label: string) => {
+    setSelected(deviceId);
+    console.log("✅ Micrófono seleccionado:", label, deviceId);
+    setSubMenuOpen(false);
+  };
 
   const handleMenuAction = (action: string) => {
     setIsOpen(false);
@@ -31,11 +49,9 @@ export default function IndexPage() {
         setTimeout(() => setIsThinking(false), 5000);
         break;
       case "Configuración":
-        setThinkingInstruction(
-          "Cargando preferencias de usuario: tema oscuro, notificaciones activadas..."
-        );
-        setIsThinking(true);
-        setTimeout(() => setIsThinking(false), 4000);
+        loadDevices();
+        setSubMenuOpen(true);
+        setIsOpen(false);
         break;
       case "Pensar":
         setThinkingInstruction(
@@ -63,6 +79,31 @@ export default function IndexPage() {
       exit={{ opacity: 0, scale: 0.8 }}
       transition={{ duration: 0.6 }}
     >
+      {subMenuOpen && (
+        <div className="absolute z-50 top-0 left-0 w-full h-full bg-black/50">
+          <div className="text-xs text-gray-300 space-y-1">
+            <label className="block font-semibold">Micrófono: {selected ? devices.find(d => d.deviceId === selected)?.label : "No seleccionado"}</label>
+            {devices.length === 0 ? (
+              <p className="text-red-400">No disponible</p>
+            ) : (
+              <select
+                className="bg-black/50 text-white px-2 py-1 rounded w-full"
+                onChange={(e) => {
+                  const [id, label] = e.target.value.split("|");
+                  handleSelect(id, label);
+                }}
+              >
+                <option value="">Selecciona...</option>
+                {devices.map((d) => (
+                  <option key={d.deviceId} value={`${d.deviceId}|${d.label}`}>
+                    {d.label || "Micrófono sin nombre"}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+        </div>
+      )}
       <VirtualAssistantSphere
         onMenuAction={handleMenuAction}
         menuItems={menuItems}
