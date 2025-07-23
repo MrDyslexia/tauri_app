@@ -49,11 +49,11 @@ export default function IndexPage() {
   }
 
 useEffect(() => {
-  invoke("resize_window_to_content", { width: 200, height: 200 });
+  invoke("resize_window_to_content", { width: 150, height: 150 });
 }, []);
   return (
     <motion.div
-      className="flex flex-col justify-end items-center min-h-screen w-screen bg-red-900 p-12"
+      className="flex flex-col justify-center items-center h-screen w-screen bg-red-900"
       initial={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
       transition={{ duration: 0.6 }}
