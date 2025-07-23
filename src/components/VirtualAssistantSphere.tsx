@@ -10,7 +10,6 @@ interface VirtualAssistantSphereProps {
   setIsThinking?: (thinking: boolean) => void;
   thinkingInstruction?: string;
 }
-
 const VirtualAssistantSphere = ({
   menuItems,
   onMenuAction,

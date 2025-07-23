@@ -4,13 +4,11 @@ import { Button, Badge } from "@heroui/react";
 import { Search, History } from "lucide-react";
 import { motion } from "framer-motion";
 import type { AssistantResponse } from "@/types/interfaces";
-
 interface HomeViewProps {
   responses: AssistantResponse[];
   onNewSearch: () => void;
   onSelectResponse: (response: AssistantResponse) => void;
 }
-
 export default function HomeView({
   responses,
   onNewSearch,
@@ -24,11 +22,9 @@ export default function HomeView({
       transition={{ duration: 0.3 }}
       className="flex flex-col w-full gap-2"
     >
-      {/* Header */}
       <div className="flex-shrink-0">
         <h1 className="text-2xl font-light text-gray-800">Recent Searches</h1>
       </div>
-
       {/* Lista de búsquedas (ocupa el espacio restante) */}
       <div className="flex-1 min-h-0 ">
         {responses.length > 0 ? (
@@ -67,8 +63,6 @@ export default function HomeView({
           </div>
         )}
       </div>
-
-      {/* Botón (siempre al fondo) */}
       <div className="flex-shrink-0">
         <Button
           className="w-full h-12 text-base bg-gradient-to-r from-blue-600 to-purple-600 

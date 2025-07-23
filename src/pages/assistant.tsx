@@ -17,7 +17,8 @@ export default function AssistantPage() {
   const [currentView, setCurrentView] = useState<ViewType>("login")
   const [currentResponse, setCurrentResponse] = useState<AssistantResponse | null>(null)
   const handleLogin = () => {
-    setCurrentView("home") 
+    invoke("resize_window_to_content", { width: 400, height: 550 });
+    setCurrentView("home")
   }
   const handleNewSearch = () => {
     setCurrentView("chat")
@@ -38,11 +39,6 @@ export default function AssistantPage() {
   useEffect(() => {
       if(currentView ==="login") {
         invoke("resize_window_to_content", { width: 400, height: 310 });
-      }
-      else if(currentView === "home") {
-        invoke("resize_window_to_content", { width: 400, height: 550 });
-      } else if(currentView === "chat" || currentView === "response") {
-        invoke("resize_window_to_content", { width: 400, height: 500 });
       }
     }, []);
   return (
