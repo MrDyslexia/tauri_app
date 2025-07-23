@@ -14,6 +14,7 @@ export default function LoginView({ onLogin }: LoginViewProps) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.3 }}
+      className="w-full h-full"
     >
       <div className="space-y-4">
         <div className="text-center">

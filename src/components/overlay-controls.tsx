@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Button, Switch } from "@heroui/react"
 import { Minimize2, Settings, ArrowLeft, EyeOff, X } from "lucide-react"
@@ -46,7 +44,7 @@ export default function OverlayControls({ onBackToSphere }: OverlayControlsProps
   return (
     <div className="relative">
       <motion.div
-        className="h-8 bg-gradient-to-r from-blue-500/20 to-purple-500/40 backdrop-blur-sm rounded-t-xl flex items-center justify-between px-3 cursor-move"
+        className="h-8 bg-gradient-to-r from-blue-500/20 to-purple-500/40 backdrop-blur-sm rounded-t-xl flex items-center justify-between pl-3 cursor-move"
         data-tauri-drag-region="true"
         onMouseEnter={() => setShowControls(true)}
         onMouseLeave={() => setShowControls(false)}
@@ -70,6 +68,7 @@ export default function OverlayControls({ onBackToSphere }: OverlayControlsProps
               {onBackToSphere && (
                 <Button
                   size="sm"
+                  isIconOnly
                   variant="light"
                   onPress={onBackToSphere}
                   className="min-w-unit-8 w-8 h-8"
@@ -85,12 +84,14 @@ export default function OverlayControls({ onBackToSphere }: OverlayControlsProps
                 onPress={() => setShowSettings(!showSettings)}
                 className="min-w-unit-8 w-8 h-8"
                 title="Configuración"
+                isIconOnly
               >
                 <Settings size={16} color="white" />
               </Button>
 
               <Button
                 size="sm"
+                isIconOnly
                 variant="light"
                 onPress={handleMinimize}
                 className="min-w-unit-8 w-8 h-8"
@@ -101,6 +102,7 @@ export default function OverlayControls({ onBackToSphere }: OverlayControlsProps
 
               <Button
                 size="sm"
+                isIconOnly
                 variant="light"
                 onPress={handleHideToTray}
                 className="min-w-unit-8 w-8 h-8"
@@ -111,6 +113,7 @@ export default function OverlayControls({ onBackToSphere }: OverlayControlsProps
 
               <Button
                 size="sm"
+                isIconOnly
                 variant="light"
                 onPress={handleQuit}
                 className="min-w-unit-8 w-8 h-8"

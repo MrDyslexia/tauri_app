@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 interface VirtualAssistantSphereProps {
   menuItems: { label: string; icon: string }[];
   onMenuAction: (action: string) => void;
@@ -63,7 +64,15 @@ const VirtualAssistantSphere = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, setIsOpen]);
-
+  useEffect(() => {
+    if(isOpen) {
+      menuRef.current?.scrollIntoView({ behavior: "smooth" });
+      invoke("resize_window_to_content", { width: 320, height: 360 });
+    }
+  else {
+      invoke("resize_window_to_content", { width: 150, height: 150 });
+    }
+  }, [isOpen]);
   return (
     <>
       <AnimatePresence>
@@ -112,7 +121,7 @@ const VirtualAssistantSphere = ({
 
       <motion.div
         ref={sphereRef}
-        className="fixed z-40 cursor-pointer"
+        className="absolute top-8 left-8 z-40 cursor-pointer"
         data-tauri-drag-region="true"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
@@ -133,9 +142,9 @@ const VirtualAssistantSphere = ({
             className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/30 via-purple-500/30 to-pink-500/30 backdrop-blur-md border border-white/30 shadow-2xl"
             style={{
               boxShadow: `
-                0 0 30px rgba(59, 130, 246, 0.6),
+                0 0 20px rgba(59, 130, 246, 0.6),
                 inset 0 0 30px rgba(255, 255, 255, 0.2),
-                0 0 80px rgba(168, 85, 247, 0.4)
+                0 0 20px rgba(168, 85, 247, 0.4)
               `,
             }}
           >
@@ -211,7 +220,7 @@ const VirtualAssistantSphere = ({
             initial={{ opacity: 0, scale: 0.5, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.5, y: 20 }}
-            className="fixed bottom-32 right-8 z-40 bg-slate-900/95 backdrop-blur-lg rounded-2xl p-4 border border-white/20 shadow-2xl min-w-48"
+            className="absolute top-20 left-20 z-40 bg-slate-900/95 backdrop-blur-lg rounded-2xl p-4 border border-white/20 shadow-md min-w-48"
           >
             <div className="space-y-2">
               <h3 className="text-white font-semibold text-sm mb-3 text-center">
