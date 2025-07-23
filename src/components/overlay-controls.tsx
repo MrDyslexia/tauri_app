@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button, Switch } from "@heroui/react"
-import { Minimize2, Settings, ArrowLeft, EyeOff, X, Sun, Moon } from "lucide-react"
+import { Settings, ArrowLeft, EyeOff, X, Sun, Moon, Minus } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTauriCommands } from "@/hooks/use-tauri-commands"
 import { useTheme } from "@/hooks/use-theme"
@@ -110,7 +110,7 @@ export default function OverlayControls({ onBackToSphere }: OverlayControlsProps
                 className="min-w-unit-8 w-8 h-8"
                 title="Minimizar a la barra de tareas"
               >
-                <Minimize2 size={16} color={theme === "dark" ? "white" : "gray"} />
+                <Minus size={16} color={theme === "dark" ? "white" : "gray"} />
               </Button>
 
               <Button
@@ -176,7 +176,7 @@ export default function OverlayControls({ onBackToSphere }: OverlayControlsProps
               <div className={`pt-2 border-t ${theme === "dark" ? "border-gray-600" : "border-gray-200"}`}>
                 <div className="grid grid-cols-2 gap-2">
                   <Button size="sm" variant="flat" onPress={handleMinimize} className="glass-button text-xs">
-                    <Minimize2 size={14} className="mr-1" />
+                    <Minus size={14} className="mr-1" />
                     Minimizar
                   </Button>
                   <Button
